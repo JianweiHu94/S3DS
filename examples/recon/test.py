@@ -36,7 +36,7 @@ SAVE_FREQ = 100
 DP_RATIO = 1.0
 
 MODEL_DIRECTORY = 'data/results/models'
-DATASET_DIRECTORY = 'data/test/viewangle_30_224_split_test'
+DATASET_DIRECTORY = 'data/shapenet_img/test/viewangle_30_224_split_test'
 
 SIGMA_VAL = 1e-6
 IMAGE_PATH = ''

@@ -183,11 +183,11 @@ class Decoder(nn.Module):
         '''
         if p == 1.0:
             return spheres
-        # 生成随机数 B N*p  (属于0~N-1)
+        
         B,N,C = spheres.shape
         P = int(N*p)
         index = torch.LongTensor(random.sample(range(N),P)).cuda()
-        #print(index)
+
         select = torch.index_select(spheres,1,index)
         select_v = torch.index_select(vertices,1,index) 
         return select,select_v
@@ -207,14 +207,13 @@ class Decoder_DIS(nn.Module):
 
         self.bn1 = nn.BatchNorm1d(512)
         self.bn2 = nn.BatchNorm1d(512)
-        #self.bn3 = nn.BatchNorm1d(256)
 
     def forward(self, x):
         # x: B N 4
         batch_size = x.shape[0]
         x = x.transpose(2,1)
-        #print(x.shape)
-        #exit()
+
+
         global_feat, trans, trans_feat = self.point_encoder(x) # B 1024
 
         x = F.relu(self.fc1(global_feat), inplace=True)
@@ -240,7 +239,7 @@ class Model(nn.Module):
 
         self.decoder_surf = Decoder(filename_obj,sphere_num=surf_num,dim_in=1000,dp_ratio=dp_ratio)
         self.decoder_displacements = Decoder_DIS(sphere_num=fine_num+surf_num)
-        #self.decoder_attention = Decoder_Attention(sphere_num=fine_num+surf_num)
+
         
         
         self.cylinder_mesh = utils.load_obj_spherenum('./data/obj/cylinder/cube.obj',(fine_num+surf_num)*2)
@@ -253,16 +252,16 @@ class Model(nn.Module):
     def reconstruct(self, images, viewpoint):
         vertices_fine, faces_fine,bias_fine, radii_fine,select_s_fine,select_v_fine,select_f_fine = self.decoder_fine(self.encoder_fine(images),viewpoint)
         vertices_surf, faces_surf,bias_surf, radii_surf,select_s_surf,select_v_surf,select_f_surf = self.decoder_surf(self.encoder_surf(images),viewpoint)
-        #print(select_s_fine.shape)
+
         if select_s_fine == None:
             select_s = None
         else:
             select_s = torch.cat([select_s_fine,select_s_surf],dim=1)
-        #print(select_s.shape)
+
         select_v = torch.cat([select_v_fine,select_v_surf],dim=1)
-        #print(select_v.shape)
+
         select_f = torch.cat([select_f_fine,select_f_fine+select_v_fine.shape[1]],dim=1)
-        #print(select_f.shape)
+
         return vertices_fine, faces_fine,bias_fine, radii_fine,vertices_surf, faces_surf,bias_surf, radii_surf,select_s,select_v,select_f
 
     def reconstruct_surf(self, images, viewpoint):
@@ -273,23 +272,18 @@ class Model(nn.Module):
         if semantic == 'FINE':
             vertices, faces,bias, radii,select_s,select_v,select_f = self.decoder_fine(self.encoder_fine(images),viewpoint)
         else:
-            #print(2)
             vertices, faces,bias, radii,select_s,select_v,select_f = self.decoder_surf(self.encoder_surf(images),viewpoint)
         return vertices, faces,bias, radii,select_s,select_v,select_f
     
     def r_finetune(self,bias,radii,k=2):
         spheres = torch.cat([bias,radii],dim=-1)
-        #print(spheres.shape)
+
         displacements = self.decoder_displacements(spheres)
         
         radii_finetune = (radii * displacements.unsqueeze(-1)).clamp(min=0.01)
-        #radii_finetune.clamp(0.001,0.001)
-        #radii_finetune = radii_finetune * 0 + 0.01
-        #print(radii_finetune)
+
         nearest_spheres,nearest_idx = self.get_neighbors(bias,radii_finetune,k) # B N 4*K
-        # print(nearest_spheres.shape)
-        # print(nearest_idx[0,0:5])
-        # exit()
+
         vertices,faces = self.compute_edges_vf_1(bias,radii_finetune,nearest_spheres,k)
 
         return vertices,faces,radii_finetune,nearest_idx
@@ -300,22 +294,20 @@ class Model(nn.Module):
         radii: B N 1
         nearest_spheres: B N K 4
         '''
-        #print()
+
         sphere_num = centers.shape[1]
         batch_size = centers.shape[0]
         top_spheres = torch.cat([centers,radii],dim=-1) # B N 4
-        #print(top_spheres.shape)
-        #print(top_spheres[0,401])
+
         top_spheres = top_spheres.unsqueeze(2).repeat(1,1,k,1)
-        #print(top_spheres[0,401,0])
+
         bottom_spheres = nearest_spheres # B N K 4
-        #print(bottom_spheres[0,401,0])
+
         
         top_spheres_edge = torch.reshape(top_spheres,(batch_size,sphere_num*k,4))
-        #print(top_spheres_edge[0,802])
+  
         bottom_spheres_edge = torch.reshape(bottom_spheres,(batch_size,sphere_num*k,4))
-        #print(bottom_spheres_edge[0,802])
-        #exit()
+
         vertices,faces = self.transfer_2squares(top_spheres_edge,bottom_spheres_edge)
         return vertices,faces
 
@@ -339,8 +331,7 @@ class Model(nn.Module):
         outputs = {}
         batch_size = image_a.shape[0]
         images = torch.cat((image_a, image_b), dim=0)
-        #print(images.shape)
-        # [Va, Va, Vb, Vb], set viewpoints
+
         viewpoints = torch.cat((viewpoint_a, viewpoint_a, viewpoint_b, viewpoint_b), dim=0)
         outputs['viewpoints'] = viewpoints
 
@@ -352,16 +343,9 @@ class Model(nn.Module):
         vertices = torch.cat(([vertices_f,vertices_s]),dim=1)
         faces = torch.cat(([faces_f,faces_s+vertices_f.shape[1]]),dim=1)
         
-        # outputs['centers'] = bias_all
-        # outputs['radii'] = radii_all
-        # outputs['centers_f'] = bias_f
-        # outputs['radii_f'] = radii_f
-        # outputs['centers_s'] = bias_s
-        # outputs['radii_s'] = radii_s
+
 
         outputs['spheres'] = torch.cat([bias_all,radii_all],dim=2)
-        #outputs['spheres_image_a'] = outputs['spheres'][0:batch_size,...]
-        #outputs['spheres_image_b'] = outputs['spheres'][batch_size:,...]
 
         # [Ma, Mb, Ma, Mb]
         outputs['vertices'] = vertices
@@ -375,8 +359,8 @@ class Model(nn.Module):
         outputs = {}
         batch_size = image_a.shape[0]
         images = torch.cat((image_a, image_b), dim=0)
-        #print(images.shape)
-        # [Va, Va, Vb, Vb], set viewpoints
+
+
         viewpoints = torch.cat((viewpoint_a, viewpoint_a, viewpoint_b, viewpoint_b), dim=0)
         outputs['viewpoints'] = viewpoints
 
@@ -430,7 +414,7 @@ class Model(nn.Module):
         outputs['centers'] = bias_all
         
         outputs['radii'] = radii_all
-        #print(radii_all.shape)
+
 
         return outputs
 
@@ -451,7 +435,7 @@ class Model(nn.Module):
         outputs['spheres'] = torch.cat([bias,radii],dim=2)
         outputs['spheres_image_a'] = outputs['spheres'][0:batch_size,...]
         outputs['spheres_image_b'] = outputs['spheres'][batch_size:,...]
-        #print(outputs['spheres'][0,0:5,:])
+
         outputs['vertices'] = vertices
         outputs['faces'] = faces
         outputs['vertices_drop'] = select_v
@@ -466,9 +450,9 @@ class Model(nn.Module):
         outputs = {}
         batch_size = image_a.shape[0]
         images = image_a
-        #viewpoints = torch.cat((viewpoint_a, viewpoint_a), dim=0)
+
         viewpoints = viewpoint_a
-        #print()
+
         
         vertices_f, faces_f,bias_f, radii_f = self.reconstruct_semantic(images,None,'FINE')
         vertices_s, faces_s,bias_s, radii_s = self.reconstruct_semantic(images,None,'SURF')
@@ -486,8 +470,7 @@ class Model(nn.Module):
         outputs = {}
         batch_size = image_a.shape[0]
         images = torch.cat((image_a, image_b), dim=0)
-        #print(images.shape)
-        # [Va, Va, Vb, Vb], set viewpoints
+
         viewpoints = torch.cat((viewpoint_a, viewpoint_a, viewpoint_b, viewpoint_b), dim=0)
        
         vertices_f, faces_f,bias_f, radii_f,vertices_s, faces_s,bias_s, radii_s = self.reconstruct(images)
@@ -520,15 +503,13 @@ class Model(nn.Module):
 
         return vertices,faces,nearest_idx
     def get_neighbors(self,centers,radii,k):
-        #centers = self.centers # B N 3
-        #radii = self.radii # B N 1
+
         length = torch.from_numpy(np.zeros(centers.shape[0],'int64')) + centers.shape[1]
         length = length.cuda()
         nn = knn_points(centers[:,:,0:3], centers[:,:,0:3], lengths1=length, lengths2=length, K=k+1)
-        #print(centers.shape)
-        #print(nn.idx[:,:,1:].shape)
+
         nearest_centers = knn_gather(centers, nn.idx[:,:,1:], None).squeeze(2) # B N K 3
-        #print(nearest_centers.shape)
+
         nearest_radii = knn_gather(radii, nn.idx[:,:,1:], None).squeeze(2) # B N K 1
         return torch.cat([nearest_centers,nearest_radii],dim=-1), nn.idx[:,:,1:] # B N K 4
     def compute_edges_vf(self,centers,radii,nearest_spheres,k):
@@ -541,15 +522,14 @@ class Model(nn.Module):
         batch_size = centers.shape[0]
         top_spheres = torch.cat([centers,radii],dim=-1) # B N 4
         top_spheres = top_spheres.unsqueeze(2).repeat(1,1,k,1)
-        #print(top_spheres.shape)
+
         bottom_spheres = nearest_spheres # B N K 4
-        #print(bottom_spheres.shape)
+
 
         top_spheres_edge = torch.reshape(top_spheres,(batch_size,sphere_num*k,4))
-        #print(top_spheres_edge.shape)
+
         bottom_spheres_edge = torch.reshape(bottom_spheres,(batch_size,sphere_num*k,4))
-        #print(top_spheres_edge.shape)
-        #exit()
+
         vertices,faces = self.transfer_2squares(top_spheres_edge,bottom_spheres_edge)
         return vertices,faces
 
@@ -558,8 +538,7 @@ class Model(nn.Module):
         outputs = {}
         batch_size = image_a.shape[0]
         images = torch.cat((image_a, image_b), dim=0)
-        #print(images.shape)
-        # [Va, Va, Vb, Vb], set viewpoints
+
         viewpoints = torch.cat((viewpoint_a, viewpoint_a, viewpoint_b, viewpoint_b), dim=0)
 
         vertices_f, faces_f,bias_f, radii_f,vertices_s, faces_s,bias_s, radii_s = self.reconstruct(images)
@@ -593,7 +572,7 @@ class Model(nn.Module):
         images = image_a
 
         viewpoints = viewpoint_a
-        #viewpoints = torch.cat((viewpoint_a, viewpoint_a), dim=0)
+
 
         vertices_f, faces_f,bias_f, radii_f,_,_,_ = self.reconstruct_semantic(images,viewpoints,'FINE')
 
@@ -650,11 +629,9 @@ class Model(nn.Module):
         outputs['viewpoints'] = viewpoints
 
         edge_vertices,edge_faces,radii_finetune,nearest_idx= self.r_finetune(centers, radii)
-        #outputs['edge_vertices'] = edge_vertices
-        #outputs['edge_faces'] = edge_faces
+
         outputs['radii_finetune'] = radii_finetune
-        #outputs['nearest_idx'] = nearest_idx
-        # [Ma, Mb, Ma, Mb]
+
         vertices = torch.cat((edge_vertices, edge_vertices), dim=0)
         faces = torch.cat((edge_faces, edge_faces), dim=0)
         outputs['vertices'] = vertices
@@ -715,8 +692,7 @@ class Model(nn.Module):
         outputs['faces_s'] = faces_s
         outputs['vertices'] = vertices
         outputs['faces'] = faces
-        #print(outputs['faces'].shape)
-        #print(outputs['vertices'].shape)
+
         outputs['centers'] = bias_all
         outputs['radii_all'] = radii_all
         outputs['radii_finetune'] = radii_finetune
@@ -849,30 +825,24 @@ class Model(nn.Module):
         data_list = {}
         batch_size = top_spheres.shape[0]
         faces = self.cylinder_mesh.faces.repeat(2,1,1).cuda() #  E*F 3
-        #faces = 
-        # print(faces.shape)
-        # exit()
-        # faces = faces[None, :, :].repeat(batch_size, 1, 1)
-        # faces = faces.cuda()
+
 
         edge_num = top_spheres.shape[1] # here use sphere_num
         dis = torch.sqrt(torch.sum(torch.pow(top_spheres[:,:,0:3] - bottom_spheres[:,:,0:3],2),2))
         mask = torch.le(dis,0.1).unsqueeze(-1)  # B N 1
-        #print(mask.shape)
-        #exit()
+
         top_centers = top_spheres[:,:,0:3]
         top_radii = top_spheres[:,:,3].unsqueeze(-1) * 1.414 * mask
         bottom_centers = bottom_spheres[:,:,0:3]
         bottom_radii = bottom_spheres[:,:,3].unsqueeze(-1) * 1.414 * mask
         edge_vector = top_centers - bottom_centers 
-        #print(edge_vector.shape)
+
         P = torch.Tensor([10.0,10.0,10.0]).unsqueeze(0).unsqueeze(0).cuda()
-        #print(P.shape)
+
         P1 = top_centers - P
         v1 = torch.abs(F.normalize(torch.cross(edge_vector,P1,dim=2),dim=2))
         v2 = F.normalize(torch.cross(edge_vector,v1,dim=2),dim=2)
-        #print(v2.shape)
-        #print(top_radii.shape)
+
         p0 = top_centers + top_radii.repeat([1,1,3]) * v1
         p1 = top_centers + top_radii.repeat([1,1,3]) * v2
         p2 = top_centers - top_radii.repeat([1,1,3]) * v1
@@ -882,8 +852,7 @@ class Model(nn.Module):
         p6 = bottom_centers - bottom_radii.repeat([1,1,3]) * v1
         p7 = bottom_centers - bottom_radii.repeat([1,1,3]) * v2
         vertices = torch.stack([p0,p1,p2,p3,p4,p5,p6,p7],dim=2)
-        #print(vertices.shape)
-        #exit()
+
 
         new_vertices = torch.reshape(vertices,(batch_size,-1,3))
         return new_vertices,faces

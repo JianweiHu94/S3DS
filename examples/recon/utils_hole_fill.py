@@ -360,35 +360,6 @@ def write_ma_check(filename_ma, spheres, edges, faces):
     f.close()
 
 
-# def draw_loop(spheres, loop_edges):
-#     mlab.figure(bgcolor=(1, 1, 1))
-#     spheres = np.array(spheres)
-#     for edge in loop_edges:
-#         v1 = edge[0]
-#         v2 = edge[1]
-#         x = [spheres[v1, 0], spheres[v2, 0]]
-#         y = [spheres[v1, 1], spheres[v2, 1]]
-#         z = [spheres[v1, 2], spheres[v2, 2]]
-#         mlab.plot3d(x, y, z, color=(0.0, 0.8, 0.0), colormap='Spectral', tube_radius=None)
-#     # mlab.colorbar()
-#     mlab.show()
-
-
-# def draw_loop_faces(spheres, loop_faces):
-#     mlab.figure(bgcolor=(1, 1, 1))
-#     spheres = np.array(spheres)
-#     for face in loop_faces:
-#         rgb = np.random.uniform(0, 1.0, size=(3))
-#         v1 = face[0]
-#         v2 = face[1]
-#         v3 = face[2]
-#         x = [spheres[v1, 0], spheres[v2, 0], spheres[v3, 0], spheres[v1, 0]]
-#         y = [spheres[v1, 1], spheres[v2, 1], spheres[v3, 1], spheres[v1, 1]]
-#         z = [spheres[v1, 2], spheres[v2, 2], spheres[v3, 2], spheres[v1, 2]]
-
-#         mlab.plot3d(x, y, z, color=(rgb[0], rgb[1], rgb[2]), tube_radius=None)
-#     # mlab.colorbar()
-#     mlab.show()
 
 
 def write_off(filename_ma, spheres, edges, faces):

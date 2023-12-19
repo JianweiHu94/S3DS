@@ -66,13 +66,10 @@ class ShapeNet(Dataset):
     def __init__(self,class_id=None, set_name=None):
         self.class_id = class_id 
         self.set_name = set_name
-        #self.view30_dir = DATA_DIR%(30) + '/03001627/03001627/'
-        #self.view0_dir = DATA_DIR%(0) + '/03001627/03001627/'
         fin = open('./data/data_list/%s_%s_cat.txt'%(class_id,set_name),'r')
         self.datalist = [x.rsplit() for x in fin.readlines()]
         self.real_len =  len(self.datalist)
 
-        print(len(self.datalist))
         self.elevation = 30.
         self.distance = 2.732
 
@@ -117,7 +114,7 @@ class ShapeNet(Dataset):
 
 
 def get_eval_img():
-    eval_img_init = cv2.imread('/home2/hujianwei/Dataset/mesh_reconstruction/viewangle_30_224_split_test/03001627/0047_01.png',cv2.IMREAD_UNCHANGED) 
+    eval_img_init = cv2.imread('./data/test/viewangle_30_224_split_test/03001627/0047_01.png',cv2.IMREAD_UNCHANGED) 
     eval_img = np.array(eval_img_init,'float32') / 255.
     tensor1 = image_to_tensor(Image.fromarray(eval_img_init[:,:,0:3]))
     tensor1 = tensor1.unsqueeze(0).cuda() # 1 3 224 224
