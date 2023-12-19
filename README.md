@@ -3,6 +3,12 @@
 This is the code of the paper " S3DS: Self-supervised Learning of 3D Skeletons from Single View Images".
 
 
+## Method Overview
+<p align="center">
+    <img src="png/overview.png">
+</p>
+
+
 ## Enviroments
 ```sh
 conda create -n S3DS python=3.7.12
