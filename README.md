@@ -2,12 +2,19 @@
 
 This is the code of the paper " S3DS: Self-supervised Learning of 3D Skeletons from Single View Images".
 
-## Requirements
-python 3.7.12
-torch 1.11.0+cu113
-tensorboard 2.11.0
-pytorch3d 0.7.1 
-kaolin 0.12.0
+
+## Eviroments
+conda create -n S3DS python=3.7.12
+
+conda activate S3DS
+
+pip install -r requirements.txt
+
+pip install kaolin==0.12.0 -f https://nvidia-kaolin.s3.us-east-2.amazonaws.com/torch-1.11.0_cu113.html
+
+cd pytorch3d
+
+python setup.py install
 
 ## Datasets
 
@@ -15,8 +22,6 @@ https://drive.google.com/file/d/1IeB9dshm6ET23Appc9MHaLlq40Vj4cAZ/view?usp=shari
 
 Download the shapenet_img to S3DS/data/
 
-
-Download resnet18-5c106cde.pth to S3DS/checkpoint/
 
 ## Training & Evaluation
 cd S3DS

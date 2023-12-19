@@ -34,12 +34,14 @@ def remder_mask(outputs,meshcolors_render,meshcolors_render_drop,drop=False):
     # render all
     if drop:
         vertices_rot,_,_ = rotate_vertices(outputs['vertices_drop'],outputs['viewpoints'])
+        
         pred_ims, pred_masks, meshnormals = \
             render_vertex_colors(vertices_rot, outputs['faces_drop'][0], meshcolors_render_drop, camproj_mtx, 224, 224)
         render_images = pred_masks
         return render_images
     else:
         vertices_rot,_,_ = rotate_vertices(outputs['vertices'],outputs['viewpoints'])
+
         pred_ims, pred_masks, meshnormals = \
             render_vertex_colors(vertices_rot, outputs['faces'][0], meshcolors_render, camproj_mtx, 224, 224)
         render_images_all = pred_masks

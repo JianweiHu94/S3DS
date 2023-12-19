@@ -87,7 +87,7 @@ def render_vertex_colors(vertices_camera, faces, vertex_colors, camera_proj,
 
     imfeat, improb, imfaceidx = dibr_rasterization_kaolin(
         height, width, face_vertices_z, face_vertices_image, face_attributes,
-        face_camera_normals_z,sigmainv=1e7)
+        face_camera_normals_z*(-1),sigmainv=1e7)
     improb = improb.unsqueeze(3)
 
     image = imfeat

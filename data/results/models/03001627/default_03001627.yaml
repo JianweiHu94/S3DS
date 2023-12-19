@@ -1,0 +1,61 @@
+model:
+  SIGMA_VAL: 1e-6
+  FINE_NUM: 200
+  SURF_NUM: 200
+  MAX_RADII: 0.2
+  DP_RATIO: 0.9
+train:
+  CLASS_ID: '03001627'
+  NUM_ITERATIONS_FINE: 100000
+  NUM_ITERATIONS_SURF: 100000
+  NUM_ITERATIONS_JOINT: 200000
+  NUM_ITERATIONS_FINETUNE: 100000
+  BATCH_SIZE: 64
+  LR_TYPE: 'step'
+  LEARNING_RATE: 0.0001
+  PRINT_FREQ: 10
+  DEMO_FREQ: 1000
+  SAVE_FREQ: 50000
+  MODEL_DIRECTORY: 'data/results/models'
+  DATASET_DIRECTORY: 'data/shapenet_img/'
+  IMAGE_SIZE: 224
+  FINETUNE: False
+  TRAIN_JOINT: True
+
+losses:
+  sphereloss: True 
+  sphere_k: 10 
+  kNNloss: False 
+  kNNloss_k: 4 
+  kNNloss_n_seeds: 50 
+  knnRepul: False 
+  knnRepul_k: 10 
+  knnRepul_n_seeds: 20 
+  knnRepul_h: 0.01 
+  nearrloss: True 
+fine_loss:
+  sphereloss: True 
+  sphere_k: 10 
+  sphere_w: 0.1 
+  nearrloss: True 
+  nearr_w: 0.2
+  repusionloss: True
+  repul_w: 0.0000001
+surf_loss:
+  sphereloss: True 
+  sphere_k: 10 
+  sphere_w: 0.1 
+  nearrloss: True 
+  nearr_w: 0.2
+  repusionloss: True
+  repul_w: 0.0000001
+joint_loss:
+  sphereloss: True 
+  sphere_k: 10 
+  sphere_w: 0.1 
+  nearrloss: True 
+  nearr_w: 0.2
+  repusionloss: True
+  repul_w: 0.0000001
+  fineloss: True
+  fine_w: 1.0

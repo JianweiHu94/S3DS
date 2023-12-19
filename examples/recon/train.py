@@ -56,6 +56,13 @@ directory_output = cfg['directory_output']
 
 losses_dicts = prepare.set_loss(cfg)
 
+# if cfg['train']['FINETUNE']:
+#     state_dicts = torch.load(cfg['train']['MODEL_DIRECTORY'])
+#     model.load_state_dict(state_dicts['model'], strict=True)
+# if cfg['train']['TRAIN_JOINT']:
+#     state_dicts = torch.load(args.model_directory)
+#     model.load_state_dict(state_dicts['model'], strict=True)
+
 
 def train():
     writer = SummaryWriter(cfg['directory_output'])

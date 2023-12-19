@@ -60,7 +60,7 @@ class_sample_num_map = {
 }
 
 
-DATA_DIR = './data/shapenet_img/viewangle_%d_224_split_test/'
+DATA_DIR = './data/test/viewangle_%d_224_split_test/'
 
 class ShapeNet(Dataset):
     def __init__(self,class_id=None, set_name=None):

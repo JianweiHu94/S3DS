@@ -36,7 +36,7 @@ SAVE_FREQ = 100
 DP_RATIO = 1.0
 
 MODEL_DIRECTORY = 'data/results/models'
-DATASET_DIRECTORY = 'data/shapenet_img/'
+DATASET_DIRECTORY = 'data/test/viewangle_30_224_split_test'
 
 SIGMA_VAL = 1e-6
 IMAGE_PATH = ''
@@ -134,11 +134,12 @@ def test():
                 fine_spheres = outputs['spheres'][k][0:FINE_NUM]
                 surf_spheres = outputs['spheres'][k][FINE_NUM:]
                 #utils.write_ma(sphere_init_path,spheres.cpu().detach().numpy())
-                utils.write_ma(sphere_path,spheres_finetune.cpu().detach().numpy())
-                #utils.write_ma(center_path,spheres_finetune[:0:3].cpu().detach().numpy())
-                #if k == 1:
-                #    vertices,faces = transfer_spheres(spheres_finetune)
-                #    utils.save_obj(mesh_path_finetune, vertices, faces)
+                #utils.write_ma(sphere_path,spheres_finetune.cpu().detach().numpy())
+                
+                if k == 1:
+                    utils.write_ma(center_path,spheres_finetune[:,0:3].cpu().detach().numpy())
+                    vertices,faces = transfer_spheres(spheres_finetune)
+                    utils.save_obj(mesh_path_finetune, vertices, faces)
                 
                 
                 #srf.save_obj(mesh_path_init, vertices_init[k], faces_init[k])

@@ -60,12 +60,14 @@ class_sample_num_map = {
 }
 
 
-DATA_DIR = './data/shapenet_img/viewangle_%d_224_split/'
+DATA_DIR = '/home2/hujianwei/Dataset/mesh_reconstruction/viewangle_%d_224_split/'
 
 class ShapeNet(Dataset):
     def __init__(self,class_id=None, set_name=None):
         self.class_id = class_id 
         self.set_name = set_name
+        #self.view30_dir = DATA_DIR%(30) + '/03001627/03001627/'
+        #self.view0_dir = DATA_DIR%(0) + '/03001627/03001627/'
         fin = open('./data/data_list/%s_%s_cat.txt'%(class_id,set_name),'r')
         self.datalist = [x.rsplit() for x in fin.readlines()]
         self.real_len =  len(self.datalist)
@@ -115,7 +117,7 @@ class ShapeNet(Dataset):
 
 
 def get_eval_img():
-    eval_img_init = cv2.imread('./data/shapenet_img/viewangle_30_224_split_test/03001627/0047_01.png',cv2.IMREAD_UNCHANGED) 
+    eval_img_init = cv2.imread('/home2/hujianwei/Dataset/mesh_reconstruction/viewangle_30_224_split_test/03001627/0047_01.png',cv2.IMREAD_UNCHANGED) 
     eval_img = np.array(eval_img_init,'float32') / 255.
     tensor1 = image_to_tensor(Image.fromarray(eval_img_init[:,:,0:3]))
     tensor1 = tensor1.unsqueeze(0).cuda() # 1 3 224 224
@@ -132,10 +134,17 @@ if __name__ == '__main__':
     CLASS_IDS_ALL = ('03001627')
     t = ShapeNet(CLASS_IDS_ALL.split(',')[0], 'train')
     dl = DataLoader(t,batch_size=64,num_workers=16,shuffle=False)
-
+    #start = time.time()
     for batch in dl:
-  
+        # print(time.time()-start)
+        # start = time.time()
         img1,img2,viewpoints_1,viewpoints_2,mask1,mask2,tensor1,tensor2,fine1,fine2 = batch 
+        print(img1.shape)
+        print(viewpoints_1.shape)
+        print(mask1.shape)
+        print(tensor1.shape)
+        print(fine1.shape)
         exit()
+
 
     
